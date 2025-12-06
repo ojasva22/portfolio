@@ -12,10 +12,14 @@ export default function GalaxyBackground() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Store references that won't be null
+    const canvasElement = canvas
+    const context = ctx
+
     // Set canvas size
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
+      canvasElement.width = window.innerWidth
+      canvasElement.height = window.innerHeight
     }
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
@@ -28,8 +32,6 @@ export default function GalaxyBackground() {
       size: number
       speed: number
       brightness: number
-      twinkleSpeed: number
-      twinkleOffset: number
 
       constructor() {
         this.x = (Math.random() - 0.5) * 2000
@@ -37,14 +39,11 @@ export default function GalaxyBackground() {
         this.z = Math.random() * 2000
         this.size = Math.random() * 1.5 + 0.3
         this.speed = Math.random() * 1 + 0.3
-        this.brightness = Math.random() * 0.3 + 0.2 // Fixed brightness, no twinkle
-        this.twinkleSpeed = 0 // Not used anymore
-        this.twinkleOffset = 0 // Not used anymore
+        this.brightness = Math.random() * 0.3 + 0.2
       }
 
       update() {
         this.z -= this.speed
-        // No twinkle - brightness stays constant
         
         if (this.z <= 0) {
           this.x = (Math.random() - 0.5) * 2000
@@ -54,31 +53,29 @@ export default function GalaxyBackground() {
       }
 
       draw() {
-        const x = (this.x / this.z) * 1000 + canvas.width / 2
-        const y = (this.y / this.z) * 1000 + canvas.height / 2
+        const x = (this.x / this.z) * 1000 + canvasElement.width / 2
+        const y = (this.y / this.z) * 1000 + canvasElement.height / 2
         const scale = 1000 / this.z
         const radius = this.size * scale
         const opacity = Math.min(this.brightness * (1 - this.z / 2000), 1)
 
-        if (x < -radius || x > canvas.width + radius || y < -radius || y > canvas.height + radius) return
+        if (x < -radius || x > canvasElement.width + radius || y < -radius || y > canvasElement.height + radius) return
 
-        // Draw star with dimmer glow
-        const dimmedOpacity = opacity * 0.4 // Reduce overall brightness
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 2)
+        const dimmedOpacity = opacity * 0.4
+        const gradient = context.createRadialGradient(x, y, 0, x, y, radius * 2)
         gradient.addColorStop(0, `rgba(255, 255, 255, ${dimmedOpacity * 0.6})`)
         gradient.addColorStop(0.5, `rgba(255, 255, 255, ${dimmedOpacity * 0.3})`)
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
 
-        ctx.fillStyle = gradient
-        ctx.beginPath()
-        ctx.arc(x, y, radius * 2, 0, Math.PI * 2)
-        ctx.fill()
+        context.fillStyle = gradient
+        context.beginPath()
+        context.arc(x, y, radius * 2, 0, Math.PI * 2)
+        context.fill()
 
-        // Dimmer core
-        ctx.fillStyle = `rgba(255, 255, 255, ${dimmedOpacity * 0.8})`
-        ctx.beginPath()
-        ctx.arc(x, y, radius * 0.8, 0, Math.PI * 2)
-        ctx.fill()
+        context.fillStyle = `rgba(255, 255, 255, ${dimmedOpacity * 0.8})`
+        context.beginPath()
+        context.arc(x, y, radius * 0.8, 0, Math.PI * 2)
+        context.fill()
       }
     }
 
@@ -93,20 +90,18 @@ export default function GalaxyBackground() {
       centerY: number
 
       constructor() {
-        this.centerX = canvas.width / 2
-        this.centerY = canvas.height / 2
+        this.centerX = canvasElement.width / 2
+        this.centerY = canvasElement.height / 2
         this.angle = Math.random() * Math.PI * 2
-        this.distance = Math.random() * Math.min(canvas.width, canvas.height) * 0.8
+        this.distance = Math.random() * Math.min(canvasElement.width, canvasElement.height) * 0.8
         this.speed = Math.random() * 0.0008 + 0.0003
         this.size = Math.random() * 2 + 1
         this.opacity = Math.random() * 0.5 + 0.2
       }
 
       update() {
-        // Rotate around center
         this.angle += this.speed
-        // Spiral effect - particles closer to center move faster
-        const spiralFactor = 1 - (this.distance / (Math.min(canvas.width, canvas.height) * 0.8))
+        const spiralFactor = 1 - (this.distance / (Math.min(canvasElement.width, canvasElement.height) * 0.8))
         this.angle += this.speed * (1 + spiralFactor * 2)
       }
 
@@ -114,23 +109,21 @@ export default function GalaxyBackground() {
         const x = this.centerX + Math.cos(this.angle) * this.distance
         const y = this.centerY + Math.sin(this.angle) * this.distance
 
-        // Fade based on distance from center
-        const distanceOpacity = 1 - (this.distance / (Math.min(canvas.width, canvas.height) * 0.8))
-        const finalOpacity = this.opacity * distanceOpacity * 0.5 // Dimmer
+        const distanceOpacity = 1 - (this.distance / (Math.min(canvasElement.width, canvasElement.height) * 0.8))
+        const finalOpacity = this.opacity * distanceOpacity * 0.5
 
-        ctx.fillStyle = `rgba(255, 255, 255, ${finalOpacity})`
-        ctx.beginPath()
-        ctx.arc(x, y, this.size, 0, Math.PI * 2)
-        ctx.fill()
+        context.fillStyle = `rgba(255, 255, 255, ${finalOpacity})`
+        context.beginPath()
+        context.arc(x, y, this.size, 0, Math.PI * 2)
+        context.fill()
 
-        // Add dimmer glow
-        const gradient = ctx.createRadialGradient(x, y, 0, x, y, this.size * 2)
+        const gradient = context.createRadialGradient(x, y, 0, x, y, this.size * 2)
         gradient.addColorStop(0, `rgba(255, 255, 255, ${finalOpacity * 0.6})`)
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
-        ctx.fillStyle = gradient
-        ctx.beginPath()
-        ctx.arc(x, y, this.size * 2, 0, Math.PI * 2)
-        ctx.fill()
+        context.fillStyle = gradient
+        context.beginPath()
+        context.arc(x, y, this.size * 2, 0, Math.PI * 2)
+        context.fill()
       }
     }
 
@@ -146,8 +139,8 @@ export default function GalaxyBackground() {
       pulseOffset: number
 
       constructor() {
-        this.x = Math.random() * canvas.width
-        this.y = Math.random() * canvas.height
+        this.x = Math.random() * canvasElement.width
+        this.y = Math.random() * canvasElement.height
         this.vx = (Math.random() - 0.5) * 0.2
         this.vy = (Math.random() - 0.5) * 0.2
         this.size = Math.random() * 200 + 100
@@ -160,19 +153,17 @@ export default function GalaxyBackground() {
         this.x += this.vx
         this.y += this.vy
 
-        // Pulse effect
         const pulse = (Math.sin(Date.now() * this.pulseSpeed + this.pulseOffset) + 1) / 2
         this.size = (Math.random() * 200 + 100) * (0.8 + pulse * 0.4)
 
-        // Wrap around edges
-        if (this.x < -this.size) this.x = canvas.width + this.size
-        if (this.x > canvas.width + this.size) this.x = -this.size
-        if (this.y < -this.size) this.y = canvas.height + this.size
-        if (this.y > canvas.height + this.size) this.y = -this.size
+        if (this.x < -this.size) this.x = canvasElement.width + this.size
+        if (this.x > canvasElement.width + this.size) this.x = -this.size
+        if (this.y < -this.size) this.y = canvasElement.height + this.size
+        if (this.y > canvasElement.height + this.size) this.y = -this.size
       }
 
       draw() {
-        const gradient = ctx.createRadialGradient(
+        const gradient = context.createRadialGradient(
           this.x,
           this.y,
           0,
@@ -185,10 +176,10 @@ export default function GalaxyBackground() {
         gradient.addColorStop(0.6, `rgba(150, 150, 150, ${this.opacity * 0.3})`)
         gradient.addColorStop(1, 'rgba(100, 100, 100, 0)')
 
-        ctx.fillStyle = gradient
-        ctx.beginPath()
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2)
-        ctx.fill()
+        context.fillStyle = gradient
+        context.beginPath()
+        context.arc(this.x, this.y, this.size, 0, Math.PI * 2)
+        context.fill()
       }
     }
 
@@ -205,8 +196,8 @@ export default function GalaxyBackground() {
       constructor() {
         this.maxLife = Math.random() * 100 + 50
         this.life = this.maxLife
-        this.x = Math.random() * canvas.width
-        this.y = Math.random() * canvas.height
+        this.x = Math.random() * canvasElement.width
+        this.y = Math.random() * canvasElement.height
         const angle = Math.random() * Math.PI * 2
         const speed = Math.random() * 3 + 2
         this.vx = Math.cos(angle) * speed
@@ -219,10 +210,10 @@ export default function GalaxyBackground() {
         this.y += this.vy
         this.life--
 
-        if (this.life <= 0 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+        if (this.life <= 0 || this.x < 0 || this.x > canvasElement.width || this.y < 0 || this.y > canvasElement.height) {
           this.life = this.maxLife
-          this.x = Math.random() * canvas.width
-          this.y = Math.random() * canvas.height
+          this.x = Math.random() * canvasElement.width
+          this.y = Math.random() * canvasElement.height
           const angle = Math.random() * Math.PI * 2
           const speed = Math.random() * 3 + 2
           this.vx = Math.cos(angle) * speed
@@ -231,8 +222,8 @@ export default function GalaxyBackground() {
       }
 
       draw() {
-        const opacity = (this.life / this.maxLife) * 0.5 // Dimmer shooting stars
-        const gradient = ctx.createLinearGradient(
+        const opacity = (this.life / this.maxLife) * 0.5
+        const gradient = context.createLinearGradient(
           this.x,
           this.y,
           this.x - this.vx * this.length,
@@ -241,16 +232,16 @@ export default function GalaxyBackground() {
         gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`)
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
 
-        ctx.strokeStyle = gradient
-        ctx.lineWidth = 1.5
-        ctx.beginPath()
-        ctx.moveTo(this.x, this.y)
-        ctx.lineTo(this.x - this.vx * this.length, this.y - this.vy * this.length)
-        ctx.stroke()
+        context.strokeStyle = gradient
+        context.lineWidth = 1.5
+        context.beginPath()
+        context.moveTo(this.x, this.y)
+        context.lineTo(this.x - this.vx * this.length, this.y - this.vy * this.length)
+        context.stroke()
       }
     }
 
-    // Create particles (reduced counts)
+    // Create particles
     const stars: Star[] = []
     for (let i = 0; i < 400; i++) {
       stars.push(new Star())
@@ -274,29 +265,24 @@ export default function GalaxyBackground() {
     // Animation loop
     let animationId: number
     const animate = () => {
-      // Clear with fade effect for trails
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      context.fillStyle = 'rgba(0, 0, 0, 0.15)'
+      context.fillRect(0, 0, canvasElement.width, canvasElement.height)
 
-      // Draw nebula clouds
       nebulaClouds.forEach(cloud => {
         cloud.update()
         cloud.draw()
       })
 
-      // Draw galaxy spiral
       galaxyParticles.forEach(particle => {
         particle.update()
         particle.draw()
       })
 
-      // Draw stars
       stars.forEach(star => {
         star.update()
         star.draw()
       })
 
-      // Draw shooting stars
       shootingStars.forEach(star => {
         star.update()
         star.draw()
